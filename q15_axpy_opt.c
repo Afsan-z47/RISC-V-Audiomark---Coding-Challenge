@@ -58,13 +58,6 @@ void q15_axpy_rvv(const int16_t *a, const int16_t *b,
 
 		__riscv_vse16_v_i16m4(&y[i], sat_vd, vl);
 
-		size_t trap_vl;
-		asm volatile ("csrr %0, vl" : "=r"(trap_vl) : : "memory");
-		if (trap_vl < vl){
-			//NOTE: RETRY
-			vl = __riscv_vsetvl_e16m4(vl);
-			__riscv_vse16_v_i16m4(&y[i], sat_vd, vl);
-		}
 		i += vl;
 	}
 #else
@@ -79,6 +72,8 @@ static int verify_equal(const int16_t *ref, const int16_t *test, int n, int32_t 
 	int32_t md = 0;
 	for (int i = 0; i < n; ++i) {
 		int32_t d = (int32_t)ref[i] - (int32_t)test[i];
+		if(d != 0)
+			printf("ID: %x [ ref : %d ] - [ vec : %d ]\n", i, ref[i], test[i]);
 		if (d < 0) d = -d;
 		if (d > md) md = d;
 		if (d != 0) ok = 0;

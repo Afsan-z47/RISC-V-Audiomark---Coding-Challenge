@@ -43,29 +43,28 @@ void q15_axpy_rvv(const int16_t *a, const int16_t *b,
 		//vint16m8_t __riscv_vle16ff_v_i16m8(const int16_t *rs1, size_t *new_vl,size_t vl)
 
 		vint16m4_t va = __riscv_vle16_v_i16m4(&a[i], vl);
+		vint16m4_t va2 = __riscv_vle16_v_i16m4(&a[i+vl], vl);
 		vint16m4_t vb = __riscv_vle16_v_i16m4(&b[i], vl);
+		vint16m4_t vb2 = __riscv_vle16_v_i16m4(&b[i+vl], vl);
 		//NOTE: Sign extend the destination for multiply-add instruction
 		vint32m8_t va_extended =  __riscv_vsext_vf2_i32m8(va, vl);
+		vint32m8_t va2_extended =  __riscv_vsext_vf2_i32m8(va2, vl);
 
 		//NOTE: (N bit * N bit) + N bit result won't overflow 2N bit
 		//NOTE: vd[i] = +(x[rs1] * vs2[i]) + vd[i]
 		// vint32m8_t vd = __riscv_vwmacc_va_i32m8(vint32m8_t vd, int16_t rs1, vint16m8_t vs2, size_t vl);
 		vint32m8_t vd = __riscv_vwmacc_vx_i32m8(va_extended, alpha, vb, vl);
+		vint32m8_t vd2 = __riscv_vwmacc_vx_i32m8(va2_extended, alpha, vb2, vl);
 
 		//NOTE: Now clip it , varm = round down if that does improve performance
 		//vint16m8_t __riscv_vnclip_wx_i16m8(vint32m8_t vs2, size_t rs1, unsigned int varm, size_t vl);
 		vint16m4_t sat_vd = __riscv_vnclip_wx_i16m4(vd, 0, __RISCV_VXRM_RDN, vl);
+		vint16m4_t sat_vd2 = __riscv_vnclip_wx_i16m4(vd2, 0, __RISCV_VXRM_RDN, vl);
 
 		__riscv_vse16_v_i16m4(&y[i], sat_vd, vl);
+		__riscv_vse16_v_i16m4(&y[i+vl], sat_vd2, vl);
 
-		size_t trap_vl;
-		asm volatile ("csrr %0, vl" : "=r"(trap_vl) : : "memory");
-		if (trap_vl < vl){
-			//NOTE: RETRY
-			vl = __riscv_vsetvl_e16m4(vl);
-			__riscv_vse16_v_i16m4(&y[i], sat_vd, vl);
-		}
-		i += vl;
+		i += vl*2;
 	}
 #else
 	// Fallback (keeps correctness off-target)
@@ -79,6 +78,8 @@ static int verify_equal(const int16_t *ref, const int16_t *test, int n, int32_t 
 	int32_t md = 0;
 	for (int i = 0; i < n; ++i) {
 		int32_t d = (int32_t)ref[i] - (int32_t)test[i];
+		if(d != 0)
+			printf("ID: %x [ ref : %d ] - [ vec : %d ]\n", i, ref[i], test[i]);
 		if (d < 0) d = -d;
 		if (d > md) md = d;
 		if (d != 0) ok = 0;
