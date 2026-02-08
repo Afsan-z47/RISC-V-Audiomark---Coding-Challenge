@@ -1,5 +1,3 @@
-Here's a comprehensive template for your RISC-V Audiomark coding challenge solution:
-
 # RISC-V Audiomark Coding Challenge: Saturating Multiply-Accumulate Implementation
 
 > [!NOTE]
