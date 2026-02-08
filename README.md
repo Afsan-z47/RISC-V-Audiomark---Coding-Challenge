@@ -2,6 +2,9 @@ Here's a comprehensive template for your RISC-V Audiomark coding challenge solut
 
 # RISC-V Audiomark Coding Challenge: Saturating Multiply-Accumulate Implementation
 
+> [!NOTE]
+> Github link : https://github.com/Afsan-z47/RISC-V-Audiomark---Coding-Challenge
+
 ## Overview
 This repository contains an optimized implementation of a saturating multiply-accumulate function (`q15_axpy`) using RISC-V Vector (RVV) intrinsics. The implementation targets Q15 fixed-point arithmetic with saturation.
 
