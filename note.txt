@@ -1,0 +1,7 @@
+clang --target=riscv64-unknown-elf -dM -E - < /dev/null | grep riscv_v
+
+/opt/riscv/Compilers/RISCSTAR/riscstar-toolchain-15.2-r1-x86_64-riscv32-none-elf/bin/riscv32-none-elf-gcc -march=rv32imcbv -mabi=ilp32 -O2 q15_axpy_challenge.c -o q15_axpy.elf
+
+/opt/riscv/Compilers/RISCSTAR/riscstar-toolchain-15.2-r1-x86_64-riscv32-none-elf/bin/riscv32-none-elf-objdump -D q15_axpy.elf > output
+
+spike --isa=rv32imcbv_Zicntr /opt/riscv/PK/riscv32-unknown-elf/bin/pk q15_axpy.elf
