@@ -6,7 +6,9 @@
 ## Overview
 This repository contains an optimized implementation of a saturating multiply-accumulate function (`q15_axpy`) using RISC-V Vector (RVV) intrinsics. The implementation targets Q15 fixed-point arithmetic with saturation.
 
-## Repo structure
+> P.S: The saturated vector mul and add instructions would have been a better choice
+
+# Repo structure
 ```text
 riscv-audiomark-challenge/
 ├── README.md
